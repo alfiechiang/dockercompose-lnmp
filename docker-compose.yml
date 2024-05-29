@@ -1,0 +1,9 @@
+version: '3.8' 
+
+services:
+  app: 
+    build:  
+      context: ./php
+    container_name: app
+    volumes:  # 挂载卷，以便主机和容器之间同步文件
+      - ./www:/www
