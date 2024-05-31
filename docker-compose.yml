@@ -4,6 +4,23 @@ services:
   app: 
     build:  
       context: ./php
+    image: app  # 设置镜像名称为 app
     container_name: app
     volumes:  # 挂载卷，以便主机和容器之间同步文件
       - ./www:/www
+  mysql:
+    build:
+      context: ./mysl
+    container_name: mysql
+    image: mysql
+    ports: 
+      - "3307:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: giant
+      MYSQL_PASSWORD: 123456
+
+
+
+    
+
