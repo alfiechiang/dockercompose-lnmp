@@ -1,26 +1,31 @@
-version: '3.8' 
+version: '3.8'
 
 services:
   app: 
     build:  
       context: ./php
-    image: app  # 设置镜像名称为 app
+    image: app
     container_name: app
-    volumes:  # 挂载卷，以便主机和容器之间同步文件
+    volumes:
       - ./www:/www
+    depends_on:
+      - mysql
+
   mysql:
-    build:
-      context: ./mysl
+    image: mysql:8.0
     container_name: mysql
-    image: mysql
     ports: 
-      - "3307:3307"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_USER: giant
       MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: test_db
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 挂载初始化 SQL 文件
 
-
-
-    
-
+volumes:
+  mysql_data:
