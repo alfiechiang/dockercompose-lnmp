@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 WORKDIR /var/www
 
@@ -17,5 +17,5 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     php -r "unlink('composer-setup.php');" && \
     mv composer.phar /usr/local/bin/composer
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "/var/www"]
+CMD ["php-fpm"]
 
