@@ -7,10 +7,9 @@ services:
     image: app
     container_name: app
     volumes:
-      - ./www:/www
+      - ./www:/var/www
     depends_on:
       - mysql
-
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -26,6 +25,5 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 挂载初始化 SQL 文件
-
 volumes:
   mysql_data:
