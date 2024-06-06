@@ -3,11 +3,13 @@ version: '3.8'
 services:
   app: 
     build:  
-      context: ./php
+      context: ./app
+      dockerfile: Dockerfile.debug
     image: app
     container_name: app
-    volumes:
-      - ./www:/var/www
+    ports: 
+      - "8080:8080"
+      - "4000:4000"
     depends_on:
       - mysql
   mysql:
