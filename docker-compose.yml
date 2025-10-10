@@ -1,12 +1,12 @@
 version: '3.8'
-
+name: docker-golang
 services:
   mysql:
     image: mysql:8.0
     container_name: mysql
     restart: always
     ports: 
-      - "3307:3306"
+      - "3308:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_USER: giant
@@ -23,5 +23,26 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+  broker:
+    image: apache/kafka:latest
+    container_name: broker
+    restart: always
+    ports:
+      - "9092:9092"   # 可選：需要從主機打內部 listener 時再開
+      - "9094:9094"   # 給主機端客戶端使用
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,EXTERNAL://:9094,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://broker:9092,EXTERNAL://localhost:9094"
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@broker:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  
 volumes:
   mysql_data:
+
