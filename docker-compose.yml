@@ -13,6 +13,18 @@ services:
       - redis-cluster-setup
     networks:
       - appnet
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"   # Web
+      - "5672:5672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: appuser
+      RABBITMQ_DEFAULT_PASS: strongpass
+      RABBITMQ_DEFAULT_VHOST: /
+    networks:
+      - appnet
   hyperf:
     build:
       context: .                 # ← 專案根
@@ -20,6 +32,7 @@ services:
     image: hyperf
     container_name: hyperf
     working_dir: /var/www
+    platform: linux/arm64/v8
     environment:
       APP_ENV: dev
     volumes:
@@ -30,6 +43,7 @@ services:
     depends_on:
       - mysql
       - redis-cluster-setup
+      - rabbitmq
     networks:
       - appnet
   mysql:

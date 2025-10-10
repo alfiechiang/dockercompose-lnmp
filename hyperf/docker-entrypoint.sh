@@ -14,6 +14,9 @@ if [ ! -f "$APP_DIR/vendor/autoload.php" ]; then
   composer install --no-dev -o --no-interaction
 fi
 
-cat /var/www/newapi/.env
-php -m
-php /var/www/newapi/bin/hyperf.php start
+
+
+exec sh -lc 'tail -f /dev/null'
+
+
+##php /var/www/newapi/bin/hyperf.php start
