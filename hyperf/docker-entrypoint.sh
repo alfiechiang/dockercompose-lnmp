@@ -3,8 +3,7 @@
 
 cd /var/www/newapi
 
-rm -Rf /var/www/newapi/runtime/container/*
-#启动 php-hyperf 服务
+##rm -Rf /var/www/newapi/runtime/container/*
 
 APP_DIR="/var/www/newapi"
 # 若 vendor 不在（多半是被 bind mount 覆蓋掉），就安裝
