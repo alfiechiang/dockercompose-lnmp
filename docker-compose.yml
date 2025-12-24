@@ -10,7 +10,6 @@ services:
       - ./www:/var/www
     depends_on:
       - mysql
-      - redis-cluster-setup
     networks:
       - appnet
   rabbitmq:
@@ -42,8 +41,19 @@ services:
       - "9501:9501"         # 方便你直接用 http://localhost:4001 測試（要的話保留）
     depends_on:
       - mysql
-      - redis-cluster-setup
       - rabbitmq
+      - redis
+    networks:
+      - appnet
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
     networks:
       - appnet
   mysql:
@@ -81,147 +91,9 @@ services:
       - "80:80"
     networks:
       - appnet
-
-  # ------- Redis Cluster (6 nodes) -------
-  redis-node-1:
-    image: redis:7-alpine
-    container_name: redis-node-1
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6301:6379"
-    volumes:
-      - redis1_data:/data
-    networks:
-      - appnet
-
-  redis-node-2:
-    image: redis:7-alpine
-    container_name: redis-node-2
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6302:6379"
-    volumes:
-      - redis2_data:/data
-    networks:
-      - appnet
-
-  redis-node-3:
-    image: redis:7-alpine
-    container_name: redis-node-3
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6303:6379"
-    volumes:
-      - redis3_data:/data
-    networks:
-      - appnet
-
-  redis-node-4:
-    image: redis:7-alpine
-    container_name: redis-node-4
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6304:6379"
-    volumes:
-      - redis4_data:/data
-    networks:
-      - appnet
-
-  redis-node-5:
-    image: redis:7-alpine
-    container_name: redis-node-5
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6305:6379"
-    volumes:
-      - redis5_data:/data
-    networks:
-      - appnet
-
-  redis-node-6:
-    image: redis:7-alpine
-    container_name: redis-node-6
-    command: >
-      sh -c "redis-server --cluster-enabled yes
-             --cluster-config-file nodes.conf
-             --cluster-node-timeout 5000
-             --appendonly yes
-             --protected-mode no
-             --port 6379"
-    ports:
-      - "6306:6379"
-    volumes:
-      - redis6_data:/data
-    networks:
-      - appnet
-
-  # 一次性容器：自動建立 3 主 3 從的 Cluster
-  redis-cluster-setup:
-    image: redis:7-alpine
-    container_name: redis-cluster-setup
-    depends_on:
-      - redis-node-1
-      - redis-node-2
-      - redis-node-3
-      - redis-node-4
-      - redis-node-5
-      - redis-node-6
-    networks:
-      - appnet
-    entrypoint: >
-      sh -c "
-        echo '⏳ waiting for redis nodes...';
-        for h in redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6; do
-          until redis-cli -h $$h -p 6379 ping | grep -q PONG; do
-            echo waiting $$h; sleep 1;
-          done;
-        done;
-        echo '🚀 creating cluster';
-        yes yes | redis-cli --cluster create
-          redis-node-1:6379 redis-node-2:6379 redis-node-3:6379
-          redis-node-4:6379 redis-node-5:6379 redis-node-6:6379
-          --cluster-replicas 1;
-        echo '✅ cluster created, sleeping...';
-        tail -f /dev/null
-      "
 volumes:
   mysql_data:
-  redis1_data:
-  redis2_data:
-  redis3_data:
-  redis4_data:
-  redis5_data:
-  redis6_data:
+  redis_data:
 networks:
   appnet:
     driver: bridge
